@@ -1,11 +1,21 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import dayjs from 'dayjs';
+import { useNavigation } from '@react-navigation/native';
+
 import { GlobalStyles } from '../../constants/style';
 
 export function ExpensesItem({ item }) {
+  const navigation = useNavigation();
+  function expensePressHandler() {
+    navigation.navigate('ManageExpensesScreen', { expenseId: item.id });
+  }
+
   return (
-    <Pressable style={({ pressed }) => pressed && styles.pressed}>
+    <Pressable
+      style={({ pressed }) => pressed && styles.pressed}
+      onPress={expensePressHandler}
+    >
       <View style={styles.container}>
         <View style={styles.leftPart}>
           <Text style={styles.description}>{item.description}</Text>
