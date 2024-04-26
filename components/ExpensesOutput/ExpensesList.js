@@ -1,5 +1,5 @@
-import React from 'react';
 import { FlatList } from 'react-native';
+
 import { ExpensesItem } from './ExpensesItem';
 
 export function ExpensesList({ expenses }) {
