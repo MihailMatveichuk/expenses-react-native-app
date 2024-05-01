@@ -34,10 +34,12 @@ export function ExpenseForm({ isEditing, onCancel, onSubmitData }) {
 
   const handleDateChanging = (text) => {
     setDateValue(text);
+    setErrorObj((prev) => ({ ...prev, date: true }));
   };
 
   const handleDescriptionChanging = (text) => {
     setDescriptionValue(text);
+    setErrorObj((prev) => ({ ...prev, description: true }));
   };
 
   useEffect(() => {
@@ -86,7 +88,7 @@ export function ExpenseForm({ isEditing, onCancel, onSubmitData }) {
               onChangeText: handleAmountChanging,
               value: amountValue,
             }}
-            isValid={!errorObj.amount}
+            isValid={errorObj.amount}
           />
           {errorObj.amount && (
             <Text style={styles.errorText}>This is not a valid amount</Text>
@@ -102,7 +104,7 @@ export function ExpenseForm({ isEditing, onCancel, onSubmitData }) {
               onChangeText: handleDateChanging,
               value: dateValue,
             }}
-            isValid={!errorObj.date}
+            isValid={errorObj.date}
           />
           {errorObj.date && (
             <Text style={styles.errorText}>This is not a valid date</Text>
@@ -120,7 +122,7 @@ export function ExpenseForm({ isEditing, onCancel, onSubmitData }) {
             autoCorrect: false,
             value: descriptionValue,
           }}
-          isValid={!errorObj.description}
+          isValid={errorObj.description}
         />
         {errorObj.description && (
           <Text style={styles.errorText}>This field is required</Text>
