@@ -5,6 +5,7 @@ import { useRoute } from '@react-navigation/native';
 import { Input } from './Input';
 import { Button } from '../../ui';
 import { ExpensesContext } from '../../store/contex';
+import { getFormatedDate } from '../../utils/getDateMinusDays';
 
 import { GlobalStyles } from '../../constants/style';
 
@@ -16,6 +17,12 @@ export function ExpenseForm({ isEditing, onCancel, onSubmitData }) {
   const [amountValue, setAmountValue] = useState('');
   const [dateValue, setDateValue] = useState('');
   const [descriptionValue, setDescriptionValue] = useState('');
+
+  const [errorObj, setErrorObj] = useState({
+    amount: false,
+    date: false,
+    description: false,
+  });
 
   const { expenses } = useContext(ExpensesContext);
 
@@ -36,57 +43,81 @@ export function ExpenseForm({ isEditing, onCancel, onSubmitData }) {
   useEffect(() => {
     if (isEditing) {
       setAmountValue(foundExpense.amount.toString());
-      setDateValue(foundExpense.date.toISOString().slice(0, 10));
+      setDateValue(getFormatedDate(foundExpense.date));
       setDescriptionValue(foundExpense.description);
     }
   }, [isEditing]);
 
   const handleSubmit = () => {
     const data = {
-      description: descriptionValue,
+      description: descriptionValue.trim(),
       amount: +amountValue,
       date: new Date(dateValue),
     };
 
-    onSubmitData(data);
+    const isAmountValidate = !isNaN(data.amount) && +data.amount > 0;
+    const isDateValidate = data.date.toString() !== 'Invalid Date';
+    const isDescriptionValidate = data.description.trim().length > 0;
+
+    isAmountValidate && isDateValidate && isDescriptionValidate
+      ? onSubmitData(data)
+      : setErrorObj({
+          amount: !isAmountValidate,
+          date: !isDateValidate,
+          description: !isDescriptionValidate,
+        });
   };
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Your Expenses</Text>
       <View style={styles.topInputs}>
-        <Input
-          style={styles.input}
-          label="Amount"
-          textInputConfig={{
-            keyboardType: 'decimal-pad',
-            onChangeText: handleAmountChanging,
-            value: amountValue,
-          }}
-        />
-        <Input
-          style={styles.input}
-          label="Date"
-          textInputConfig={{
-            placeholder: 'YYYY-MM-DD',
-            maxLength: 10,
-            onChangeText: handleDateChanging,
-            value: dateValue,
-          }}
-        />
+        <View style={styles.inputContainer}>
+          <Input
+            style={styles.input}
+            label="Amount"
+            textInputConfig={{
+              keyboardType: 'decimal-pad',
+              onChangeText: handleAmountChanging,
+              value: amountValue,
+            }}
+          />
+          {errorObj.amount && (
+            <Text style={styles.errorText}>This is not a valid amount</Text>
+          )}
+        </View>
+        <View style={styles.inputContainer}>
+          <Input
+            style={styles.input}
+            label="Date"
+            textInputConfig={{
+              placeholder: 'YYYY-MM-DD',
+              maxLength: 10,
+              onChangeText: handleDateChanging,
+              value: dateValue,
+            }}
+          />
+          {errorObj.date && (
+            <Text style={styles.errorText}>This is not a valid date</Text>
+          )}
+        </View>
       </View>
-
-      <Input
-        label="Description"
-        textInputConfig={{
-          placeholder: 'Description',
-          maxLength: 255,
-          multiline: true,
-          onChangeText: handleDescriptionChanging,
-          autoCorrect: false,
-          value: descriptionValue,
-        }}
-      />
+      <View>
+        <Input
+          label="Description"
+          textInputConfig={{
+            placeholder: 'Description',
+            maxLength: 255,
+            multiline: true,
+            onChangeText: handleDescriptionChanging,
+            autoCorrect: false,
+            value: descriptionValue,
+          }}
+        />
+        {errorObj.description && (
+          <Text style={styles.errorText}>This field is required</Text>
+        )}
+      </View>
 
       <View style={styles.editButtonsContainer}>
         <Button style={styles.button} mode={'flat'} onPress={onCancel}>
@@ -116,17 +147,26 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
+  inputContainer: {
+    width: '50%',
+    position: 'relative',
+  },
   editButtonsContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
     gap: 8,
+    marginTop: 12,
     marginHorizontal: 12,
   },
   button: {
     width: '40%',
   },
-  input: {
-    flex: 1,
+
+  errorText: {
+    color: GlobalStyles.colors.error500,
+    position: 'absolute',
+    bottom: -10,
+    left: 5,
   },
 });
