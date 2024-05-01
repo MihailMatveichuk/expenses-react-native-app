@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Alert, StyleSheet, Text, View } from 'react-native';
 import { useRoute } from '@react-navigation/native';
 
 import { Input } from './Input';
@@ -59,13 +59,18 @@ export function ExpenseForm({ isEditing, onCancel, onSubmitData }) {
     const isDateValidate = data.date.toString() !== 'Invalid Date';
     const isDescriptionValidate = data.description.trim().length > 0;
 
+    const handleError = () => {
+      setErrorObj({
+        amount: !isAmountValidate,
+        date: !isDateValidate,
+        description: !isDescriptionValidate,
+      });
+      Alert.alert('Please enter a valid amount, date and description');
+    };
+
     isAmountValidate && isDateValidate && isDescriptionValidate
       ? onSubmitData(data)
-      : setErrorObj({
-          amount: !isAmountValidate,
-          date: !isDateValidate,
-          description: !isDescriptionValidate,
-        });
+      : handleError();
   };
 
   return (
