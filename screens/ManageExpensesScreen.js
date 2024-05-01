@@ -1,5 +1,6 @@
 import { useLayoutEffect, useContext } from 'react';
 import { StyleSheet, View } from 'react-native';
+import uuid from 'react-native-uuid';
 
 import { IconButton } from '../ui';
 import { ExpensesContext } from '../store/contex';
@@ -34,7 +35,7 @@ export function ManageExpensesScreen({ route, navigation }) {
     if (isEditing) {
       updateExpense(expenseId, data);
     } else {
-      addExpense({ id: 'k1', ...data });
+      addExpense({ id: uuid.v4(), ...data });
     }
     navigation.goBack();
   }
