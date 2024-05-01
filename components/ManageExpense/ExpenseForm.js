@@ -30,16 +30,17 @@ export function ExpenseForm({ isEditing, onCancel, onSubmitData }) {
 
   const handleAmountChanging = (text) => {
     setAmountValue(text);
+    setErrorObj((prev) => ({ ...prev, amount: false }));
   };
 
   const handleDateChanging = (text) => {
     setDateValue(text);
-    setErrorObj((prev) => ({ ...prev, date: true }));
+    setErrorObj((prev) => ({ ...prev, date: false }));
   };
 
   const handleDescriptionChanging = (text) => {
     setDescriptionValue(text);
-    setErrorObj((prev) => ({ ...prev, description: true }));
+    setErrorObj((prev) => ({ ...prev, description: false }));
   };
 
   useEffect(() => {
