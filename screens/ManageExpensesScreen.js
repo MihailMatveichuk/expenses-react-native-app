@@ -1,10 +1,10 @@
-import { useLayoutEffect, useContext } from 'react';
+import { useLayoutEffect, useContext, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import uuid from 'react-native-uuid';
 
-import { IconButton } from '../ui';
+import { ErrorOverlay, IconButton, LoadingOverlay } from '../ui';
 import { ExpensesContext } from '../store/contex';
 import { ExpenseForm } from '../components/ManageExpense';
+import { DELETEExpense, POSTExpense, UPDATEExpense } from '../api/http';
 
 import { GlobalStyles } from '../constants/style';
 
@@ -13,6 +13,8 @@ export function ManageExpensesScreen({ route, navigation }) {
 
   const { deleteExpense, updateExpense, addExpense } =
     useContext(ExpensesContext);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isError, setIsError] = useState(false);
 
   const isEditing = !!expenseId;
 
@@ -22,22 +24,50 @@ export function ManageExpensesScreen({ route, navigation }) {
     });
   }, [isEditing, navigation]);
 
-  const deleteExpenseHandler = (id) => {
-    deleteExpense(id);
+  const deleteExpenseHandler = async (id) => {
+    setIsSubmitting(true);
+    try {
+      await DELETEExpense(id);
+      deleteExpense(id);
+      navigation.goBack();
+    } catch (error) {
+      setIsError(true);
+      setIsSubmitting(false);
+    }
+  };
+
+  const cancelHandler = () => {
     navigation.goBack();
   };
 
-  function cancelHandler() {
-    navigation.goBack();
+  const confirmHandler = async (data) => {
+    setIsSubmitting(true);
+    try {
+      if (isEditing) {
+        await UPDATEExpense(expenseId, data);
+        updateExpense(expenseId, data);
+      } else {
+        const id = await POSTExpense(data);
+        addExpense({ id: id, ...data });
+      }
+      navigation.goBack();
+    } catch (error) {
+      setIsError(true);
+      setIsSubmitting(false);
+    }
+  };
+
+  if (isError) {
+    return (
+      <ErrorOverlay
+        message="Could not save the expense"
+        onConfitmed={() => setIsError(false)}
+      />
+    );
   }
 
-  function confirmHandler(data) {
-    if (isEditing) {
-      updateExpense(expenseId, data);
-    } else {
-      addExpense({ id: uuid.v4(), ...data });
-    }
-    navigation.goBack();
+  if (isSubmitting) {
+    return <LoadingOverlay />;
   }
 
   return (

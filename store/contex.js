@@ -1,17 +1,16 @@
 import { createContext, useState } from 'react';
 
-import { expensesData } from '../data/expenses-data';
-
 export const ExpensesContext = createContext({
   expenses: [],
   addExpense: ({ description, amount, date }) => {},
+  setExpenses: (data) => {},
   deleteExpense: (id) => {},
   updateExpense: (id, { description, amount, date }) => {},
 });
 
 export const ExpensesContextProvider = ({ children }) => {
   const [value, setValue] = useState({
-    expenses: expensesData,
+    expenses: [],
     addExpense: ({ id, description, amount, date }) => {
       setValue((prev) => ({
         ...prev,
@@ -24,6 +23,9 @@ export const ExpensesContextProvider = ({ children }) => {
         expenses: prev.expenses.filter((expense) => expense.id !== id),
       }));
     },
+    setExpenses: (data) => {
+      setValue((prev) => ({ ...prev, expenses: data.reverse() }));
+    },
     updateExpense: (id, { description, amount, date }) => {
       setValue((prev) => ({
         ...prev,
@@ -35,8 +37,6 @@ export const ExpensesContextProvider = ({ children }) => {
       }));
     },
   });
-
-  console.log(value.expenses.length);
 
   return (
     <ExpensesContext.Provider value={value}>
